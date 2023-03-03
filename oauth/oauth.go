@@ -22,9 +22,6 @@ const (
 	ACCESS_TOKEN_URI      = "/oauth/access_token/%s"
 )
 
-type Client interface {
-}
-
 func IsPublic(in *http.Request) bool {
 	if in == nil {
 		return false
@@ -70,6 +67,9 @@ func Authenticate(in *http.Request) *errors.Rest {
 	client := rest.NewClient(resty.New(), ACCESS_TOKEN_BASE_URL, ACCESS_TOKEN_URI)
 	at, err := client.GetAccessToken(accessToken)
 	if err != nil {
+		if err.Status == http.StatusNotFound {
+			return nil
+		}
 		return err
 	}
 
@@ -85,5 +85,4 @@ func cleanRequest(in *http.Request) {
 	}
 	in.Header.Del(HEADER_X_CLIENT_ID)
 	in.Header.Del(HEADER_X_CALLER_ID)
-
 }
